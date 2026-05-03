@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Audit{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Audit Queue</h1>
+    <p>Review finalized accounts for quality assurance</p>
+</div>
+
+<div class="filter-bar">
+    <a href="{{ url_for('audit_list') }}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+    <a href="{{ url_for('audit_list', status='pending') }}" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Audit</a>
+    <a href="{{ url_for('audit_list', status='passed') }}" class="btn btn-sm {% if status_filter == 'passed' %}btn-primary{% else %}btn-secondary{% endif %}">Passed</a>
+    <a href="{{ url_for('audit_list', status='failed') }}" class="btn btn-sm {% if status_filter == 'failed' %}btn-primary{% else %}btn-secondary{% endif %}">Failed</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Coder</th>
+                    <th>Biller</th>
+                    <th>Status</th>
+                    <th>Audit</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <td><strong>{{ acc['invoice_number'] }}</strong></td>
+                    <td>{{ acc['coder_name'] or '—' }}</td>
+                    <td>{{ acc['biller_name'] or '—' }}</td>
+                    <td>
+                        <span class="badge {% if 'Passed' in acc['status'] %}badge-green{% elif 'Failed' in acc['status'] %}badge-red{% else %}badge-blue{% endif %}">
+                            {{ acc['status'] }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if acc['audit_status'] == 'Passed' %}
+                        <span class="badge badge-green">Passed</span>
+                        {% elif acc['audit_status'] == 'Failed' %}
+                        <span class="badge badge-red">Failed</span>
+                        {% else %}
+                        <span class="badge badge-amber">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td><a href="{{ url_for('account_detail', account_id=acc['id']) }}" class="btn btn-sm {% if not acc['audit_status'] %}btn-primary{% else %}btn-secondary{% endif %}">{% if not acc['audit_status'] %}Audit{% else %}View{% endif %}</a></td>
+                </tr>
+                {% endfor %}
+                {% if not accounts %}
+                <tr><td colspan="6" class="empty-state">No accounts in audit queue</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

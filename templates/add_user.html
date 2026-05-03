@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Add User{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <h1>Add New User</h1>
+        <a href="{{ url_for('users_list') }}" class="btn btn-secondary">Back to Users</a>
+    </div>
+</div>
+
+<div class="card" style="max-width:600px">
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" class="form-input" required placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-input" required placeholder="Enter username (lowercase)">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" required placeholder="Min 8 characters" minlength="8">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select" id="roleSelect" onchange="toggleUserType()">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Auditor">Auditor</option>
+                </select>
+            </div>
+            <div class="form-group" id="userTypeGroup">
+                <label class="form-label">User Type</label>
+                <select name="user_type" class="form-select">
+                    <option value="Coder">Coder</option>
+                    <option value="Biller">Biller</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create User</button>
+    </form>
+</div>
+
+<script>
+function toggleUserType() {
+    const role = document.getElementById('roleSelect').value;
+    document.getElementById('userTypeGroup').style.display = role === 'User' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

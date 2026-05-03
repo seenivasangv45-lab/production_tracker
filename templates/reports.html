@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <h1>Reports & Analytics</h1>
+            <p>Production metrics, quality performance, and data exports</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('export_data') }}" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3V10M8 10L5 7M8 10L11 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 11V13H13V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Export All Data
+            </a>
+            <a href="{{ url_for('backup_database') }}" class="btn btn-secondary">
+                Download DB Backup
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Date-wise Inventory -->
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header"><h2>Date-wise Inventory (Last 30 Days)</h2></div>
+    {% if date_inventory %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>Date</th><th>Total Received</th><th>Completed</th><th>High Priority</th><th>Completion %</th></tr>
+            </thead>
+            <tbody>
+                {% for row in date_inventory %}
+                <tr>
+                    <td><strong>{{ row['upload_date'] }}</strong></td>
+                    <td>{{ row['total'] }}</td>
+                    <td>{{ row['completed'] }}</td>
+                    <td>{% if row['high_priority'] > 0 %}<span class="badge badge-red">{{ row['high_priority'] }}</span>{% else %}0{% endif %}</td>
+                    <td>
+                        {% if row['total'] > 0 %}
+                        <span class="badge {% if (row['completed'] / row['total'] * 100) >= 80 %}badge-green{% elif (row['completed'] / row['total'] * 100) >= 50 %}badge-amber{% else %}badge-red{% endif %}">
+                            {{ "%.0f"|format(row['completed'] / row['total'] * 100) }}%
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No inventory data yet</p></div>
+    {% endif %}
+</div>
+
+<!-- Quality Performance -->
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header"><h2>Quality Performance by Coder</h2></div>
+    {% if quality %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>Coder</th><th>Audited</th><th>Passed</th><th>Failed</th><th>Accuracy</th></tr>
+            </thead>
+            <tbody>
+                {% for q in quality %}
+                <tr>
+                    <td><strong>{{ q['coder'] }}</strong></td>
+                    <td>{{ q['audited'] }}</td>
+                    <td><span class="badge badge-green">{{ q['passed'] }}</span></td>
+                    <td>{% if q['failed'] > 0 %}<span class="badge badge-red">{{ q['failed'] }}</span>{% else %}0{% endif %}</td>
+                    <td>
+                        {% if q['audited'] > 0 %}
+                        <span class="badge {% if (q['passed'] / q['audited'] * 100) >= 90 %}badge-green{% elif (q['passed'] / q['audited'] * 100) >= 70 %}badge-amber{% else %}badge-red{% endif %}">
+                            {{ "%.1f"|format(q['passed'] / q['audited'] * 100) }}%
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No audit data yet</p></div>
+    {% endif %}
+</div>
+
+<!-- Export with Date Range -->
+<div class="card">
+    <div class="card-header"><h2>Custom Export</h2></div>
+    <form class="form-inline" method="GET" action="{{ url_for('export_data') }}">
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">From</label>
+            <input type="date" name="from" class="form-input">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">To</label>
+            <input type="date" name="to" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-primary">Export to CSV</button>
+    </form>
+</div>
+{% endblock %}

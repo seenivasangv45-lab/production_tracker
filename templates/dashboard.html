@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, {{ session.get('full_name') }}. Here's your overview.</p>
+</div>
+
+{% if rework_alerts %}
+<div class="rework-alert">
+    <h3>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3L2 17H18L10 3Z" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M10 9V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14.5" r="0.8" fill="currentColor"/></svg>
+        Rework Required — Action Needed
+    </h3>
+    <ul>
+        {% for alert in rework_alerts %}
+        <li>
+            <a href="{{ url_for('account_detail', account_id=alert['id']) }}">{{ alert['invoice_number'] }}</a>
+            — {{ alert['auditor_comments'] or 'Review required' }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if session.get('role') in ('Admin', 'Auditor') %}
+<div class="stat-grid">
+    <div class="stat-card blue">
+        <div class="stat-label">Total Accounts</div>
+        <div class="stat-value">{{ data.get('total_accounts', 0) }}</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Today Received</div>
+        <div class="stat-value">{{ data.get('today_received', 0) }}</div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-label">Unassigned</div>
+        <div class="stat-value">{{ data.get('unassigned', 0) }}</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-label">Coding Pending</div>
+        <div class="stat-value">{{ data.get('coding_pending', 0) }}</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-label">Billing Pending</div>
+        <div class="stat-value">{{ data.get('billing_pending', 0) }}</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Finalized</div>
+        <div class="stat-value">{{ data.get('finalized', 0) }}</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">High Priority</div>
+        <div class="stat-value">{{ data.get('high_priority', 0) }}</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">Aging (>5 days)</div>
+        <div class="stat-value">{{ data.get('aging_accounts', 0) }}</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2>Daily Inventory (Last 7 Days)</h2>
+        </div>
+        {% if data.get('daily_production') %}
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Date</th><th>Accounts</th></tr></thead>
+                <tbody>
+                {% for row in data.daily_production %}
+                <tr><td>{{ row['upload_date'] }}</td><td><strong>{{ row['cnt'] }}</strong></td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><p>No data yet</p></div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Audit Summary</h2>
+        </div>
+        <div class="stat-grid" style="margin-bottom:0">
+            <div class="stat-card green">
+                <div class="stat-label">Audited</div>
+                <div class="stat-value">{{ data.get('audit_total', 0) }}</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Passed</div>
+                <div class="stat-value">{{ data.get('audit_passed', 0) }}</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-label">Failed</div>
+                <div class="stat-value">{{ data.get('audit_failed', 0) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif session.get('role') == 'User' %}
+<div class="stat-grid">
+    <div class="stat-card blue">
+        <div class="stat-label">Assigned</div>
+        <div class="stat-value">{{ data.get('assigned', 0) }}</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">{{ data.get('completed', 0) }}</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">Rework</div>
+        <div class="stat-value">{{ data.get('rework', 0) }}</div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-label">High Priority</div>
+        <div class="stat-value">{{ data.get('high_priority', 0) }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Quick Actions</h2>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('production_view') }}" class="btn btn-primary">View My Work Queue</a>
+        <a href="{{ url_for('inventory_list') }}" class="btn btn-secondary">Browse Inventory</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
