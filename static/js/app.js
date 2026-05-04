@@ -54,12 +54,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Mobile sidebar toggle
-    const hamburger = document.querySelector('.hamburger');
-    if (hamburger) {
-        hamburger.addEventListener('click', () => {
-            document.querySelector('.sidebar').classList.toggle('open');
-        });
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (overlay) overlay.classList.add('open');
     }
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+    }
+
+    if (menuToggle) menuToggle.addEventListener('click', openSidebar);
+    if (menuClose) menuClose.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar when clicking a nav link (mobile)
+    document.querySelectorAll('.sidebar .nav-item').forEach(link => {
+        link.addEventListener('click', closeSidebar);
+    });
 });
 
 function updateAssignBar() {
